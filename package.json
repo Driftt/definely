@@ -1,0 +1,33 @@
+{
+  "name": "definely",
+  "version": "1.0.0",
+  "description": "Drift app in nodejs for fetching definitions in conversations",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Driftt/definely.git"
+  },
+  "keywords": [
+    "drift",
+    "api",
+    "definely",
+    "definitions",
+    "service"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Driftt/definely/issues"
+  },
+  "homepage": "https://github.com/Driftt/definely#readme",
+  "dependencies": {
+    "aws-sdk": "^2.266.1",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "superagent": "^3.8.3"
+  }
+}
