@@ -66,7 +66,7 @@ const createDefinitionMessage = (orgId, word, meanings) => {
     });
     if (defs.length) {
         body += defs;
-    } else {
+    } else { // no definitions.
         body = `<br/><b>I got nothing for ${word}</b>, this is English correct?`;
     }
     body = body.replace(/(?:\r\n|\r|\n)/g, '<br/>');
