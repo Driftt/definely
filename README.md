@@ -25,9 +25,11 @@ Lastly, install the dependencies and start the app server.
 </pre>
 The app should now be running on port 3001.
 
-### Conversation View Output:
+### Conversation View Screenshots
 
-<img src="assets/note.png"/>
+<img src="assets/conv1.png" width="600"/>
+
+<img src="assets/conv2.png" width="600"/>
 
 ### Third party services:
 * https://www.twinword.com/api/word-dictionary.php
