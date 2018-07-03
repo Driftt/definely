@@ -1,7 +1,7 @@
 {
   "name": "definely",
   "version": "1.0.0",
-  "description": "Drift app in nodejs for fetching definitions in conversations",
+  "description": "Drift app in nodejs for fetching definitions for users in conversations",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -16,16 +16,17 @@
     "api",
     "definely",
     "definitions",
-    "service"
+    "service",
+    "conversation",
+    "app"
   ],
-  "author": "",
+  "author": "Drift",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Driftt/definely/issues"
   },
   "homepage": "https://github.com/Driftt/definely#readme",
   "dependencies": {
-    "aws-sdk": "^2.266.1",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "superagent": "^3.8.3"
