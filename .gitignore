@@ -1,3 +1,7 @@
 
 node_modules
+definely-server/node_modules
+definely-lambda/node_modules
+definely-lambda/*zip
+*.zip
 .DS_Store
