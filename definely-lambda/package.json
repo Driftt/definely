@@ -17,6 +17,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.271.1",
     "superagent": "^3.8.3"
   }
 }
