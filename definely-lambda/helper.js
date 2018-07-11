@@ -10,15 +10,13 @@ const library = (function () {
         'https://driftapiqa.com/v1/conversations' :
         'https://driftapi.com/v1/conversations';
 
-    const OAUTH_URL = IS_QA ?
-        "https://driftapiqa.com/oauth2/token" :
-        "https://driftapi.com/oauth2/token";
+
 
     // Endpoint for word definition fetch.
     const DEFINITION_URL = "https://www.twinword.com/api/v4/word/definition/";
 
-    console.log('oauth url', OAUTH_URL);
     console.log('conversation api', CONVERSATION_API_BASE);
+    // console.log('id', CLIENT_ID, 'secret', CLIENT_SECRET);
 
     // Send a drift message to be posted by the drift api.
     const sendMessage = (token, conversationId, message, onFail) => {
@@ -82,35 +80,13 @@ const library = (function () {
       }`;
     }
 
-    const postRefreshToken = (refreshToken) => {
-        return request.post(OAUTH_URL)
-            .set('Content-Type', 'application/json')
-            .send({
-                clientId: process.env.CLIENT_ID,
-                clientSecret: process.env.CLIENT_SECRET,
-                refreshToken: refreshToken,
-                grantType: 'refresh_token'
-            })
-    }
-
-    const postAuthCode = (authCode) => {
-        return request.post(OAUTH_URL)
-            .set('Content-Type', 'application/json')
-            .send({
-                clientId: process.env.CLIENT_ID,
-                clientSecret: process.env.CLIENT_SECRET,
-                code: authCode,
-                grantType: 'authorization_code'
-            })
-    }
-
-    const generateResponse = (status, body) => {
+    const generateResponse = (statusCode, body) => {
         return {
-            statusCode: status,
-            body: body,
-            headers: {
+            "statusCode": statusCode,
+            "headers": {
                 "Content-Type": "text/html"
-            }
+            },
+            "body": body
         };
     }
 
@@ -119,8 +95,6 @@ const library = (function () {
         getDefinition: getDefinition,
         generateResponse: generateResponse,
         createDefinitionMessage: createDefinitionMessage,
-        postAuthCode: postAuthCode,
-        postRefreshToken: postRefreshToken
     };
 
 })();

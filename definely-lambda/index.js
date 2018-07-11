@@ -1,10 +1,25 @@
 const AWS = require('aws-sdk');
+const fs = require('fs');
+const request = require('superagent');
+
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 const helper = require('./helper');
 
 const OAUTH_TABLE = process.env.TABLE_NAME || 'definely-oauth-table';
-console.log('oauth table', OAUTH_TABLE);
+
+const SUCCESS_HTML = fs.readFileSync('./success.html', 'utf8')
+
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+
+const IS_QA = process.env.DEFINELY_QA;
+
+const OAUTH_URL = IS_QA ?
+"https://driftapiqa.com/oauth2/token" :
+"https://driftapi.com/oauth2/token";
+
+console.log('oauth url', OAUTH_URL);
 
 /*
  * Attempts to send a message to the drift conversation view using the existing accessToken
@@ -22,30 +37,37 @@ const sendMessageWithRetry = (orgId, conversationId, driftMessage) => {
         if (err) {
             // Entry for the orgId should exist in our table after the org installs the app, this is an invalid state.
             // user would need to reauth the app.
-            console.error('Error getting auth token from table', err);
+            console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
             return;
         }
         const accessToken = data.accessToken;
         const refreshToken = data.refreshToken;
 
-        sendMessage(accessToken, conversationId, driftMessage, (err) => {
-            return helper.postRefreshToken(refreshToken)
+        helper.sendMessage(accessToken, conversationId, driftMessage, (err) => {
+            return request.post(OAUTH_URL)
+                .set('Content-Type', 'application/json')
+                .send({
+                    clientId: CLIENT_ID,
+                    clientSecret: CLIENT_SECRET,
+                    refreshToken: refreshToken,
+                    grantType: 'refresh_token'
+                })
                 .then((res) => {
                     // New credentials post token refresh request.
                     const newRefreshToken = res.body.refreshToken;
                     const newAccessToken = res.body.accessToken;
                     const newParams = {
                         Item: {
-                            orgId: orgId,
-                            accessToken: newAccessToken,
-                            refreshToken: newRefreshToken
+                            "orgId": orgId,
+                            "accessToken": newAccessToken,
+                            "refreshToken": newRefreshToken
                         },
                         TableName: OAUTH_TABLE
                     };
                     // Update the token table.
                     documentClient.put(newParams, function (err, data) {
                         if (err) {
-                            console.error('error updating token table', err);
+                            console.error('dynamo error', JSON.stringify(err));
                             // We may want to add better error handling here later in case our DB is at fault.
                             // This should be ok assumming normal DB function.
                         };
@@ -80,25 +102,36 @@ const handleMessage = (orgId, data) => {
     }
 }
 
-const handleAuth = (authCode, callback) => {
-    return helper.postAuthCode(authCode)
+const handleAuth = (code, callback) => {
+    return request.post(OAUTH_URL)
+        .set('Content-Type', 'application/json')
+        .send({
+            "clientId": CLIENT_ID,
+            "clientSecret": CLIENT_SECRET,
+            "code": code,
+            "grantType": "authorization_code"
+        })
         .then((res) => {
-            const { refreshToken, accessToken, orgId } = res.body
+            const { refreshToken, accessToken, orgId } = res.body;
             const params = {
                 Item: {
-                    orgId: orgId,
-                    accessToken: accessToken,
-                    refreshToken: refreshToken
+                    "orgId": orgId,
+                    "accessToken": accessToken,
+                    "refreshToken": refreshToken
                 },
                 TableName: OAUTH_TABLE
             }
             // Store the tokens for the org.
-            documentClient.put(params, function (err, data) {
+            console.log("storing token", JSON.stringify(params));
+            documentClient.put(params, function(err, data) {
                 // callback will supply the web response for the api.
+                console.log('dynamo callback', err, data);
                 if (err) {
+                    console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
                     callback(err, helper.generateResponse(500, err));
                 } else { // no error.
-                    callback(null, helper.generateResponse(200, "<div>Registered App!</div>"));
+                    console.log('stored item');
+                    callback(err, helper.generateResponse(200, SUCCESS_HTML));
                 };
             });
         })
@@ -107,17 +140,51 @@ const handleAuth = (authCode, callback) => {
 
 // Handler for all incoming requests.
 exports.handler = (event, context, callback) => {
-    const authCode = event.queryStringParameters.code;
-    console.log('received event', JSON.stringify(event));
+    const code = event.queryStringParameters.code
+  return request.post(OAUTH_URL)
+    .set('Content-Type', 'application/json')
+    .send({
+      clientId: CLIENT_ID,
+      clientSecret: CLIENT_SECRET,
+      code,
+      grantType: 'authorization_code'
+    })
+    .then((res) => {
+      const { refreshToken, accessToken, orgId } = res.body
+      const params = {
+        Item: {
+          orgId,
+          accessToken,
+          refreshToken
+        },
+        TableName: OAUTH_TABLE
+      }
+      documentClient.put(params, function (err, data) {
+        if (err) {
+          callback(err, generateResponse(err))
+        } else {
+          callback(err, generateResponse(SUCCESS_HTML)) 
+        }
+      })
+    })
+    .catch(err => console.log(err))
+
+    // let code = "";
+    // if (event.hasOwnProperty("queryStringParameters")) {
+    //     code = event.queryStringParameters.code;
+    //     console.log('received event code', JSON.stringify(code));
+    // }
     
-    // If the authcode (redirect code) is defined, treat it as an authorization request.
-    if (authCode) {
-        return handleAuth(authCode, callback);
-    } else { // else handle as an api/webhook invocation.
-        const body = JSON.parse(event.body);
-        const orgId = body.orgId;
-        const data = body.data;
-        return handleMessage(orgId, data);
-    }
+    // // If the authcode (redirect code) is defined, treat it as an authorization request.
+    // if (code) {
+    //     return handleAuth(code, callback);
+    // } 
+
+    // // Gandle as an api/webhook invocation.
+    // const body = JSON.parse(event.body);
+    // const orgId = body.orgId;
+    // const data = body.data;
+    // return handleMessage(orgId, data);
 };
 
+console.log('oauth table', OAUTH_TABLE);
