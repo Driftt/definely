@@ -25,6 +25,7 @@ const CONVERSATION_API_BASE = IS_QA ?
     'https://driftapi.com/v1/conversations';
 
 console.log('oauth url', OAUTH_URL);
+console.log('oauth table', TABLE_NAME);
 
 /*
  * Attempts to refresh the access token and retry the send request.
@@ -155,5 +156,3 @@ exports.handler = (event, context, callback) => {
     const data = body.data;
     return handleMessage(orgId, data);
 };
-
-console.log('oauth table', TABLE_NAME);
