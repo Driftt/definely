@@ -4,28 +4,10 @@
 const library = (function () {
     const request = require('superagent');
 
-    const IS_QA = process.env.DEFINELY_QA;
-    // Endpoint for drift conversation api, you'll want to leave DEFINELY_QA as undefined or false.
-    const CONVERSATION_API_BASE = IS_QA ?
-        'https://driftapiqa.com/v1/conversations' :
-        'https://driftapi.com/v1/conversations';
-
-
+    const TABLE_NAME = process.env.TABLE_NAME || 'definely-oauth-table';
 
     // Endpoint for word definition fetch.
     const DEFINITION_URL = "https://www.twinword.com/api/v4/word/definition/";
-
-    console.log('conversation api', CONVERSATION_API_BASE);
-    // console.log('id', CLIENT_ID, 'secret', CLIENT_SECRET);
-
-    // Send a drift message to be posted by the drift api.
-    const sendMessage = (token, conversationId, message, onFail) => {
-        return request.post(CONVERSATION_API_BASE + `/${conversationId}/messages`)
-            .set('Content-Type', 'application/json')
-            .set(`Authorization`, `bearer ${token}`)
-            .send(message)
-            .catch(onFail);
-    }
 
     /*
      * Retrieves a definition (if present) from twinword for the provided word
@@ -43,6 +25,23 @@ const library = (function () {
 
     const capitalize = (s) => {
         return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    const createTokenPayload = (orgId, accessToken, refreshToken) => {
+        return {
+            "Item": {
+                "orgId": {
+                    N: orgId + ""
+                },
+                "accessToken": {
+                    S: accessToken
+                },
+                "refreshToken": {
+                    S: refreshToken
+                }
+            },
+            "TableName": TABLE_NAME
+        };
     }
 
     /*
@@ -91,7 +90,7 @@ const library = (function () {
     }
 
     return {
-        sendMessage: sendMessage,
+        createTokenPayload: createTokenPayload,
         getDefinition: getDefinition,
         generateResponse: generateResponse,
         createDefinitionMessage: createDefinitionMessage,
