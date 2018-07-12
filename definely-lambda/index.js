@@ -127,17 +127,7 @@ const handleAuth = (code, callback) => {
         })
         .catch(err => console.log(err));
     }
-
-const generateResponse = (body) => {
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type" : "text/html"
-    },
-    body
-  }
-}
-
+    
 exports.handler = (event, context, callback) => {
     let code = "";
     if (event.queryStringParameters) {
