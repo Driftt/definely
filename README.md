@@ -6,24 +6,40 @@
 Definely - A Definition bot for drift conversations.
 ---
 
-Definely is a drift app written in Nodejs allowing agents to fetch definitions for words live within the drift conversation view.
+Definely is a <a href="www.drift.com" target="_blank">Drift</a> app written in Nodejs allowing agents to fetch definitions for words live within the drift conversation view.
 
-This is an app used both at Drift and in the medium article "Your first Drift Bot Application".
+### Getting Started
 
-### Setting up:
+There are two different forms of the Definely app in this repository:
+<ol>
+    <li>Hosting the app with a self-managed server (without Oauth added).</li>
+    <li>Hosting the app on AWS with Oauth (enabling public use).</li>
+</ol>
 
-Define the following environment variable. You can get this value from the 'Manage App' view of your app after you have installed the application to your drift org.
+### Deploying the server version.
 
+This is the app described in the medium article 
+<a href="https://medium.com/drift-engineering/your-first-drift-conversation-bot-63522aafcb8e" target="_blank">
+    "Your first Drift Conversation Bot"
+</a>.
+
+This app as-is can be used internally for your org.
+
+
+### Deploying the lambda version.
+
+This is the app described in the medium article 
+<a href="https://medium.com/drift-engineering/your-first-drift-conversation-bot-63522aafcb8e" target="_blank">
+    Your first Drift Bot Application
+</a>.
+
+Compressing the app for lambda deployment.
 <pre>
-    DEFINELY_TOKEN={token}
+    zip -r lambda.zip definely-lambda/*
 </pre>
-Note that in a public app this token will be retrieved/managed via Oauth.
 
-Lastly, install the dependencies and start the app server.
-<pre>
-    yarn && yarn start
-</pre>
-The app should now be running on port 3001.
+<!-- This app is live and can be seen in the Drift App Store! -->
+
 
 ### Conversation View Screenshots
 

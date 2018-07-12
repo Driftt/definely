@@ -102,6 +102,7 @@ const PORT = process.env.PORT || 3001;
 app.use(bodyParser.json());
 app.listen(PORT, () => console.log(`Drift app listening on port ${PORT}!`))
 app.post('/api', (req, res) => {
+    // console.log('body', JSON.stringify(req.body));
     // new_message is a particular drift event type for the web hook.
     if (req.body.type === 'new_message') {
         handleMessage(req.body.orgId, req.body.data)
