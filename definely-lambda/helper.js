@@ -16,7 +16,7 @@ const library = (function () {
      * @param cb callback for a successful definition response
      */
     const getDefinition = (word, cb) => {
-        console.log(`Getting definition for: ${word}`)
+        // console.log(`Getting definition for: ${word}`)
         return request.post(DEFINITION_URL)
             .send(`entry=${word}`)
             .then(cb)

@@ -24,9 +24,6 @@ const CONVERSATION_API_BASE = IS_QA ?
     'https://driftapiqa.com/v1/conversations' :
     'https://driftapi.com/v1/conversations';
 
-console.log('oauth url', OAUTH_URL);
-console.log('oauth table', TABLE_NAME);
-
 /*
  * Attempts to refresh the access token and retry the send request.
  */
@@ -60,7 +57,7 @@ const sendMessage = (orgId, conversationId, message) => {
     }
     return ddb.getItem(params, (err, data) => {
         if (!err && data) { // if we successfully 
-            console.log("fetch auth tokens", orgId, data, err);
+            // console.log("fetch auth tokens", orgId, data, err);
             const accessToken = data.Item.accessToken.S
             const refreshToken = data.Item.refreshToken.S
             return request.post(CONVERSATION_API_BASE + `/${conversationId}/messages`)
@@ -83,7 +80,7 @@ const sendMessage = (orgId, conversationId, message) => {
  * Message handler for items posted in the conversation view.
  */
 const handleMessage = (orgId, data) => {
-    console.log('handle message', orgId, data);
+    // console.log('handle message', orgId, data);
     if (data.type === 'private_note') {
         const messageBody = data.body;
         const conversationId = data.conversationId;
@@ -113,26 +110,26 @@ const handleAuth = (code, callback) => {
             const { refreshToken, accessToken, orgId } = res.body;
             const params = helper.createTokenPayload(orgId, accessToken, refreshToken);
             // Store the tokens for the org.
-            console.log("storing token", JSON.stringify(params));
+            // console.log("storing token", JSON.stringify(params));
             ddb.putItem(params, function(err, data) {
                 // callback will supply the web response for the api.
                 if (err) {
                     console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
                     callback(err, helper.generateResponse(500, err));
                 } else { // no error.
-                    console.log('stored item', data);
+                    // console.log('stored item');
                     callback(err, helper.generateResponse(200, SUCCESS_HTML));
                 };
             });
         })
         .catch(err => console.log(err));
     }
-    
+
 exports.handler = (event, context, callback) => {
     let code = "";
     if (event.queryStringParameters) {
         code = event.queryStringParameters.code;
-        console.log('received event code', JSON.stringify(code));
+        // console.log('received event code', JSON.stringify(code));
     }
     
     // If the authcode (redirect code) is defined, treat it as an authorization request.
