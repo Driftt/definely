@@ -28,7 +28,7 @@
   "homepage": "https://github.com/Driftt/definely#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
-    "express": "^4.16.3",
+    "express": "^4.17.3",
     "superagent": "^3.8.3"
   }
 }
